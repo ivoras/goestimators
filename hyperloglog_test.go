@@ -1,9 +1,8 @@
 package gohyperloglog
 
 import (
-	"bytes"
 	"crypto/rand"
-	"encoding/binary"
+	"fmt"
 	"testing"
 	"unsafe"
 )
@@ -19,6 +18,7 @@ func TestLlogLogSimple(t *testing.T) {
 	if est >= 15000 || est <= 5000 {
 		t.Errorf("The estimate is a bit off: %d", est)
 	}
+	fmt.Println("LogLogSimple", est)
 }
 
 func TestLogLogRandom(t *testing.T) {
@@ -39,6 +39,28 @@ func TestLogLogRandom(t *testing.T) {
 	if est <= 50000 || est >= 150000 {
 		t.Errorf("The estimate is a bit off: %d", est)
 	}
+	fmt.Println("LogLogRandom", est)
+}
+
+func TestSuperLogLogRandom(t *testing.T) {
+	ll := NewLogLog()
+	var buf [8]byte
+	const NumEntries = 100000
+	for i := 0; i < NumEntries; i++ {
+		n, err := rand.Read(buf[:])
+		if err != nil {
+			t.Errorf("rand.Read() returned an error: %v", err)
+		}
+		if n != len(buf) {
+			t.Errorf("Couldn't read %d bytes from rand.Read(), read %d", len(buf), n)
+		}
+		ll.Observe(buf[:])
+	}
+	est := ll.SuperEstimate()
+	if est <= 50000 || est >= 150000 {
+		t.Errorf("The estimate is a bit off: %d", est)
+	}
+	fmt.Println("SuperLogLogRandom", est)
 }
 
 func TestBitsSet(t *testing.T) {
@@ -120,10 +142,7 @@ func BenchmarkCountTrailing1Slow(b *testing.B) {
 }
 
 func bytesToUint64(b []byte) uint64 {
-	var res uint64
-	rd := bytes.NewReader(b)
-	binary.Read(rd, binary.LittleEndian, &res)
-	return res
+	return *((*uint64)(unsafe.Pointer(&b)))
 }
 
 func uint64ToBytes(x uint64, b []byte) {

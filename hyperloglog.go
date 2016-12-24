@@ -2,13 +2,24 @@ package gohyperloglog
 
 import (
 	"math"
+	"sort"
 
 	"github.com/spaolacci/murmur3"
 )
 
+const logLogBucketCount = 32
+
+type logLogBuckets [logLogBucketCount]byte
+
+type byteSlice []byte
+
+func (a byteSlice) Len() int           { return logLogBucketCount }
+func (a byteSlice) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byteSlice) Less(i, j int) bool { return a[i] < a[j] }
+
 // LogLog is the structure with book-keeping data for the LogLog calculations.
 type LogLog struct {
-	buckets [32]byte
+	buckets logLogBuckets
 }
 
 // NewLogLog returns an initialised LogLog structure.
@@ -38,6 +49,24 @@ func (l *LogLog) Estimate() uint64 {
 	return uint64(math.Pow(2, average) * float64(len(l.buckets)) * 0.79402)
 }
 
+// SuperEstimate returns a cardinality estimation based on the SuperLogLog modification of the LogLog algorithm
+func (l *LogLog) SuperEstimate() uint64 {
+	var sortedBuckets logLogBuckets
+	copy(sortedBuckets[:], l.buckets[:])
+	sort.Sort(byteSlice(sortedBuckets[:]))
+	cutoff := logLogBucketCount * 0.7
+	icutoff := int(cutoff) // WTF Go???
+	var sum uint
+	for i, b := range l.buckets {
+		if i > icutoff {
+			break
+		}
+		sum += uint(b)
+	}
+	average := float64(sum) / float64(icutoff)
+	return uint64(math.Pow(2, average) * float64(icutoff) * 0.79402)
+}
+
 // HyperLogLog is the structure with book-keeping data for the HyperLogLog calculations.
 type HyperLogLog struct {
 	x int
@@ -61,7 +90,7 @@ func hash64(b []byte) uint64 {
 	return murmur3.Sum64(b)
 }
 
-func countBitsSetInBuffer(buf []byte) uint {
+func countBitsSetInBytes(buf []byte) uint {
 	var count uint
 	for _, b := range buf {
 		var c uint
