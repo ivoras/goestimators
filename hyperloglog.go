@@ -8,7 +8,7 @@ import (
 
 // LogLog is the structure with book-keeping data for the LogLog calculations.
 type LogLog struct {
-	buckets [256]byte
+	buckets [32]byte
 }
 
 // NewLogLog returns an initialised LogLog structure.
@@ -21,8 +21,8 @@ func NewLogLog() LogLog {
 // in its data structure.
 func (l *LogLog) Observe(b []byte) {
 	h := hash64(b)
-	bucket := h & 0xff
-	count1 := countTrailing1InUint64(h >> 8)
+	bucket := h & 0x1f
+	count1 := countTrailing1InUint64Alt(h >> 5)
 	if count1 > l.buckets[bucket] {
 		l.buckets[bucket] = count1
 	}
@@ -35,7 +35,7 @@ func (l *LogLog) Estimate() uint64 {
 		sum += uint(b)
 	}
 	average := float64(sum) / float64(len(l.buckets))
-	return uint64(math.Pow(2, average*float64(len(l.buckets))*0.79402))
+	return uint64(math.Pow(2, average) * float64(len(l.buckets)) * 0.79402)
 }
 
 // HyperLogLog is the structure with book-keeping data for the HyperLogLog calculations.
@@ -87,4 +87,17 @@ func countRInUint64(x uint64) uint64 {
 
 func countTrailing1InUint64(x uint64) byte {
 	return byte(countBitsSetInUint64(countRInUint64(x) - 1))
+}
+
+func countTrailing1InUint64Alt(x uint64) byte {
+	var c uint
+	for x != 0 {
+		b := x & 1
+		if b == 0 {
+			break
+		}
+		c++
+		x = x >> 1
+	}
+	return byte(c)
 }
