@@ -18,7 +18,7 @@ func TestLlogLogSimple(t *testing.T) {
 	if est >= 15000 || est <= 5000 {
 		t.Errorf("The estimate is a bit off: %d", est)
 	}
-	fmt.Println("LogLogSimple", est)
+	fmt.Println("LogLogSimple_10k", est)
 }
 
 func TestLogLogRandom(t *testing.T) {
@@ -39,7 +39,7 @@ func TestLogLogRandom(t *testing.T) {
 	if est <= 50000 || est >= 150000 {
 		t.Errorf("The estimate is a bit off: %d", est)
 	}
-	fmt.Println("LogLogRandom", est)
+	fmt.Println("LogLogRandom_100k", est)
 }
 
 func TestSuperLogLogRandom(t *testing.T) {
@@ -60,7 +60,7 @@ func TestSuperLogLogRandom(t *testing.T) {
 	if est <= 50000 || est >= 150000 {
 		t.Errorf("The estimate is a bit off: %d", est)
 	}
-	fmt.Println("SuperLogLogRandom", est)
+	fmt.Println("SuperLogLogRandom_100k", est)
 }
 
 func TestBitsSet(t *testing.T) {

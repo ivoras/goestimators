@@ -7,7 +7,7 @@ import (
 	"github.com/spaolacci/murmur3"
 )
 
-const logLogBucketCount = 32
+const logLogBucketCount = 256
 
 type logLogBuckets [logLogBucketCount]byte
 
@@ -32,8 +32,8 @@ func NewLogLog() LogLog {
 // in its data structure.
 func (l *LogLog) Observe(b []byte) {
 	h := hash64(b)
-	bucket := h & 0x1f
-	count1 := countTrailing1InUint64Alt(h >> 5)
+	bucket := h & 0xff
+	count1 := countTrailing1InUint64Alt(h >> 8)
 	if count1 > l.buckets[bucket] {
 		l.buckets[bucket] = count1
 	}
@@ -54,7 +54,7 @@ func (l *LogLog) SuperEstimate() uint64 {
 	var sortedBuckets logLogBuckets
 	copy(sortedBuckets[:], l.buckets[:])
 	sort.Sort(byteSlice(sortedBuckets[:]))
-	cutoff := logLogBucketCount * 0.7
+	cutoff := logLogBucketCount * 0.9
 	icutoff := int(cutoff) // WTF Go???
 	var sum uint
 	for i, b := range l.buckets {
