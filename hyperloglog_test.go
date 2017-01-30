@@ -8,7 +8,8 @@ import (
 )
 
 func TestLlogLogSimple(t *testing.T) {
-	ll := NewLogLog()
+	ll, _ := NewLogLog(1024)
+	fmt.Printf("len(ll.buckets)=%d, ll.bucmask=%x, ll.bucbits=%d\n", len(ll.buckets), ll.bucmask, ll.bucbits)
 	var buf [8]byte
 	for i := uint64(0); i < 10000; i++ {
 		uint64ToBytes(i, buf[:])
@@ -22,7 +23,7 @@ func TestLlogLogSimple(t *testing.T) {
 }
 
 func TestLogLogRandom(t *testing.T) {
-	ll := NewLogLog()
+	ll, _ := NewLogLog(1024)
 	var buf [8]byte
 	const NumEntries = 100000
 	for i := 0; i < NumEntries; i++ {
@@ -43,9 +44,9 @@ func TestLogLogRandom(t *testing.T) {
 }
 
 func TestSuperLogLogRandom(t *testing.T) {
-	ll := NewLogLog()
+	ll, _ := NewLogLog(1024)
 	var buf [8]byte
-	const NumEntries = 100000
+	const NumEntries = 1000000
 	for i := 0; i < NumEntries; i++ {
 		n, err := rand.Read(buf[:])
 		if err != nil {
@@ -57,10 +58,10 @@ func TestSuperLogLogRandom(t *testing.T) {
 		ll.Observe(buf[:])
 	}
 	est := ll.SuperEstimate()
-	if est <= 50000 || est >= 150000 {
+	if est <= 500000 || est >= 1500000 {
 		t.Errorf("The estimate is a bit off: %d", est)
 	}
-	fmt.Println("SuperLogLogRandom_100k", est)
+	fmt.Println("SuperLogLogRandom_1M", est)
 }
 
 func TestBitsSet(t *testing.T) {

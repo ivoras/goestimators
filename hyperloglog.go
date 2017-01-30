@@ -1,39 +1,44 @@
 package gohyperloglog
 
 import (
+	"fmt"
 	"math"
 	"sort"
 
 	"github.com/spaolacci/murmur3"
 )
 
-const logLogBucketCount = 256
-
-type logLogBuckets [logLogBucketCount]byte
-
 type byteSlice []byte
 
-func (a byteSlice) Len() int           { return logLogBucketCount }
+func (a byteSlice) Len() int           { return len(a) }
 func (a byteSlice) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a byteSlice) Less(i, j int) bool { return a[i] < a[j] }
 
 // LogLog is the structure with book-keeping data for the LogLog calculations.
 type LogLog struct {
-	buckets logLogBuckets
+	buckets []byte
+	bucmask uint
+	bucbits byte
 }
 
 // NewLogLog returns an initialised LogLog structure.
-func NewLogLog() LogLog {
+func NewLogLog(nBuckets uint) (*LogLog, error) {
+	if !isUintPowerOf2(nBuckets) {
+		return nil, fmt.Errorf("%d is not a power of 2", nBuckets)
+	}
 	var ll LogLog
-	return ll
+	ll.buckets = make([]byte, nBuckets)
+	ll.bucmask = nBuckets - 1
+	ll.bucbits = countTrailing1InUint64Alt(uint64(ll.bucmask))
+	return &ll, nil
 }
 
 // Observe makes the LogLog calculation for the given byte array, "counting" it
 // in its data structure.
 func (l *LogLog) Observe(b []byte) {
 	h := hash64(b)
-	bucket := h & 0xff
-	count1 := countTrailing1InUint64Alt(h >> 8)
+	bucket := h & uint64(l.bucmask)
+	count1 := countTrailing1InUint64Alt(h >> l.bucbits)
 	if count1 > l.buckets[bucket] {
 		l.buckets[bucket] = count1
 	}
@@ -51,20 +56,19 @@ func (l *LogLog) Estimate() uint64 {
 
 // SuperEstimate returns a cardinality estimation based on the SuperLogLog modification of the LogLog algorithm
 func (l *LogLog) SuperEstimate() uint64 {
-	var sortedBuckets logLogBuckets
+	var sortedBuckets []byte
 	copy(sortedBuckets[:], l.buckets[:])
 	sort.Sort(byteSlice(sortedBuckets[:]))
-	cutoff := logLogBucketCount * 0.9
-	icutoff := int(cutoff) // WTF Go???
+	cutoff := int(float64(len(l.buckets)) * 0.9)
 	var sum uint
 	for i, b := range l.buckets {
-		if i > icutoff {
+		if i > cutoff {
 			break
 		}
 		sum += uint(b)
 	}
-	average := float64(sum) / float64(icutoff)
-	return uint64(math.Pow(2, average) * float64(icutoff) * 0.79402)
+	average := float64(sum) / float64(cutoff)
+	return uint64(math.Pow(2, average) * float64(cutoff) * 0.79402)
 }
 
 // HyperLogLog is the structure with book-keeping data for the HyperLogLog calculations.
@@ -129,4 +133,8 @@ func countTrailing1InUint64Alt(x uint64) byte {
 		x = x >> 1
 	}
 	return byte(c)
+}
+
+func isUintPowerOf2(x uint) bool {
+	return (x & (x - 1)) == 0
 }
