@@ -53,6 +53,27 @@ func TestLogLogRandom(t *testing.T) {
 	fmt.Println("LogLogRandom_100k", est)
 }
 
+func TestLogLogRandom1M(t *testing.T) {
+	ll, _ := NewLogLog(1024)
+	var buf [8]byte
+	const NumEntries = 1000000
+	for i := 0; i < NumEntries; i++ {
+		n, err := rand.Read(buf[:])
+		if err != nil {
+			t.Errorf("rand.Read() returned an error: %v", err)
+		}
+		if n != len(buf) {
+			t.Errorf("Couldn't read %d bytes from rand.Read(), read %d", len(buf), n)
+		}
+		ll.Observe(buf[:])
+	}
+	est := ll.Estimate()
+	if est <= 500000 || est >= 1500000 {
+		t.Errorf("The estimate is a bit off: %d", est)
+	}
+	fmt.Println("LogLogRandom_1M", est)
+}
+
 func TestSuperLogLogRandom(t *testing.T) {
 	ll, _ := NewLogLog(1024)
 	var buf [8]byte

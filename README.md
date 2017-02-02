@@ -36,9 +36,9 @@ This example uses the plain old LogLog estimation algorithm, implemented in the 
 
 Measured on an i5-5200U, the benchmark results are:
 
-    BenchmarkLogLog-4                        2000000               741 ns/op
-    BenchmarkSuperLogLog-4                   2000000               794 ns/op
-    BenchmarkHyperLogLog-4                     30000             58773 ns/op
-    BenchmarkObservationLogLog-4            20000000                63.7 ns/op
+    BenchmarkLogLog-4                        2000000               712 ns/op
+    BenchmarkSuperLogLog-4                   2000000               763 ns/op
+    BenchmarkHyperLogLog-4                    500000              2367 ns/op
+    BenchmarkObservationLogLog-4            20000000                61.6 ns/op
 
-Since HyperLogLog improves accuracy only a couple of percent compared to LogLog and SuperLogLog, users should decide for themselves if they can accept the hit in performance.
+Since HyperLogLog improves accuracy only slightly compared to LogLog and SuperLogLog, users should decide for themselves if they can accept the hit in performance.

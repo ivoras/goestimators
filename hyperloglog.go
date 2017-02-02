@@ -89,7 +89,7 @@ func (l *LogLog) HyperEstimate() uint64 {
 	hm := float64(0)
 	nempties := float64(0)
 	for _, k := range l.buckets {
-		hm += math.Pow(2, -float64(k))
+		hm += 1.0 / float64(uint(1)<<k)
 		if k == 0 {
 			nempties++
 		}
