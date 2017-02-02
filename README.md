@@ -23,7 +23,7 @@ This library uses the [murmur3](https://en.wikipedia.org/wiki/MurmurHash) hash f
 		rand.Read(buf)
 		ll.Observe(buf)  // Observes the buffer, i.e. updates internal representation from it
 	}
-	est := ll.Estimate() // Returns the estimated number of observed buffers
+	est := ll.Estimate() // Returns the estimated number of unique observed buffers
 	fmt.Println("Estimate of a set of 100k random entries: ", est)
 
 This example uses the plain old LogLog estimation algorithm, implemented in the `Estimate()` function. All three algorithms can be used from the same observation results:
@@ -42,3 +42,13 @@ Measured on an i5-5200U, the benchmark results are:
     BenchmarkObservationLogLog-4            20000000                61.6 ns/op
 
 Since HyperLogLog improves accuracy only slightly compared to LogLog and SuperLogLog, users should decide for themselves if they can accept the hit in performance.
+
+## Accuracy 
+
+A typical run of the test functions looks like this:
+
+    LogLogRandom_1M 918170
+    SuperLogLogRandom_1M 932190
+    HyperLogLogRandom_1M 1059335
+
+These are the estimates for 1M of random 8-byte buffers by the respective algorithms. YMMV.
