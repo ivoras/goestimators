@@ -20,6 +20,16 @@ func TestLlogLogSimple(t *testing.T) {
 		t.Errorf("The estimate is a bit off: %d", est)
 	}
 	fmt.Println("LogLogSimple_10k", est)
+	est = ll.SuperEstimate()
+	if est >= 15000 || est <= 5000 {
+		t.Errorf("The estimate is a bit off: %d", est)
+	}
+	fmt.Println("SuperLogLogSimple_10k", est)
+	est = ll.HyperEstimate()
+	if est >= 15000 || est <= 5000 {
+		t.Errorf("The estimate is a bit off: %d", est)
+	}
+	fmt.Println("HyperLogLogSimple_10k", est)
 }
 
 func TestLogLogRandom(t *testing.T) {
@@ -151,5 +161,52 @@ func uint64ToBytes(x uint64, b []byte) {
 	for i := 0; i < 8; i++ {
 		b[i] = byte(*(*byte)(unsafe.Pointer(p)))
 		p++
+	}
+}
+
+func BenchmarkLogLog(b *testing.B) {
+	ll, _ := NewLogLog(1024)
+	var buf [8]byte
+	for i := uint64(0); i < 100000; i++ {
+		uint64ToBytes(i, buf[:])
+		ll.Observe(buf[:])
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ll.Estimate()
+	}
+}
+
+func BenchmarkSuperLogLog(b *testing.B) {
+	ll, _ := NewLogLog(1024)
+	var buf [8]byte
+	for i := uint64(0); i < 100000; i++ {
+		uint64ToBytes(i, buf[:])
+		ll.Observe(buf[:])
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ll.SuperEstimate()
+	}
+}
+
+func BenchmarkHyperLogLog(b *testing.B) {
+	ll, _ := NewLogLog(1024)
+	var buf [8]byte
+	for i := uint64(0); i < 100000; i++ {
+		uint64ToBytes(i, buf[:])
+		ll.Observe(buf[:])
+	}
+	for i := 0; i < b.N; i++ {
+		ll.HyperEstimate()
+	}
+}
+
+func BenchmarkObservationLogLog(b *testing.B) {
+	ll, _ := NewLogLog(1024)
+	var buf [8]byte
+	for i := uint64(0); i < uint64(b.N); i++ {
+		uint64ToBytes(i, buf[:])
+		ll.Observe(buf[:])
 	}
 }
