@@ -74,6 +74,27 @@ func TestSuperLogLogRandom(t *testing.T) {
 	fmt.Println("SuperLogLogRandom_1M", est)
 }
 
+func TestHyperLogLogRandom(t *testing.T) {
+	ll, _ := NewLogLog(1024)
+	var buf [8]byte
+	const NumEntries = 1000000
+	for i := 0; i < NumEntries; i++ {
+		n, err := rand.Read(buf[:])
+		if err != nil {
+			t.Errorf("rand.Read() returned an error: %v", err)
+		}
+		if n != len(buf) {
+			t.Errorf("Couldn't read %d bytes from rand.Read(), read %d", len(buf), n)
+		}
+		ll.Observe(buf[:])
+	}
+	est := ll.HyperEstimate()
+	if est <= 500000 || est >= 1500000 {
+		t.Errorf("The estimate is a bit off: %d", est)
+	}
+	fmt.Println("HyperLogLogRandom_1M", est)
+}
+
 func TestBitsSet(t *testing.T) {
 	if countTrailing1InUint64(uint64(23)) != 3 { // 10111
 		t.Errorf("Error for %d: %d", 23, countTrailing1InUint64(uint64(23)))
@@ -204,9 +225,9 @@ func BenchmarkHyperLogLog(b *testing.B) {
 
 func BenchmarkObservationLogLog(b *testing.B) {
 	ll, _ := NewLogLog(1024)
-	var buf [8]byte
+	var buf = make([]byte, 8)
 	for i := uint64(0); i < uint64(b.N); i++ {
-		uint64ToBytes(i, buf[:])
-		ll.Observe(buf[:])
+		uint64ToBytes(i, buf)
+		ll.Observe(buf)
 	}
 }

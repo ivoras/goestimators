@@ -13,14 +13,32 @@ This library was implemented from scratch, by interpreting the following papers 
 
 Any implementation errors are probably my own.
 
-## Usage
+This library uses the [murmur3](https://en.wikipedia.org/wiki/MurmurHash) hash function implementation from [github.com/spaolacci/murmur3](https://github.com/spaolacci/murmur3).
+
+## Example
 
 	ll, _ := NewLogLog(1024)
-	var buf [8]byte
-	const NumEntries = 100000
-	for i := 0; i < NumEntries; i++ {
-		n, err := rand.Read(buf[:])
-		ll.Observe(buf[:])  // Observes the buffer, i.e. updates internal representation from it
+	var buf := make([]byte, 8)
+	for i := 0; i < 100000; i++ {
+		rand.Read(buf)
+		ll.Observe(buf)  // Observes the buffer, i.e. updates internal representation from it
 	}
-	est := ll.Estimate()    // Returns the estimated number of observed buffers
+	est := ll.Estimate() // Returns the estimated number of observed buffers
 	fmt.Println("Estimate of a set of 100k random entries: ", est)
+
+This example uses the plain old LogLog estimation algorithm, implemented in the `Estimate()` function. All three algorithms can be used from the same observation results:
+
+* `Estimate()` - LogLog (fastest)
+* `SuperEstimate()` - SuperLogLog
+* `HyperEstimate()` - HyperLogLog (slowest)
+
+## Performance
+
+Measured on an i5-5200U, the benchmark results are:
+
+    BenchmarkLogLog-4                        2000000               741 ns/op
+    BenchmarkSuperLogLog-4                   2000000               794 ns/op
+    BenchmarkHyperLogLog-4                     30000             58773 ns/op
+    BenchmarkObservationLogLog-4            20000000                63.7 ns/op
+
+Since HyperLogLog improves accuracy only a couple of percent compared to LogLog and SuperLogLog, users should decide for themselves if they can accept the hit in performance.

@@ -69,7 +69,7 @@ func (l *LogLog) Estimate() uint64 {
 // SuperEstimate returns a cardinality estimation based on the SuperLogLog modification of the LogLog algorithm
 func (l *LogLog) SuperEstimate() uint64 {
 	var sortedBuckets []byte
-	copy(sortedBuckets[:], l.buckets[:])
+	copy(sortedBuckets, l.buckets[:])
 	sort.Sort(byteSlice(sortedBuckets[:]))
 	cutoff := int(float64(len(l.buckets)) * 0.9)
 	var sum uint
@@ -85,7 +85,23 @@ func (l *LogLog) SuperEstimate() uint64 {
 
 // HyperEstimate returns a cardinality estimation based on the HyperLogLog modification of the SuperLogLog algorithm
 func (l *LogLog) HyperEstimate() uint64 {
-	return 0
+	nbuckets := float64(len(l.buckets))
+	hm := float64(0)
+	nempties := float64(0)
+	for _, k := range l.buckets {
+		hm += math.Pow(2, -float64(k))
+		if k == 0 {
+			nempties++
+		}
+	}
+
+	hm = nbuckets / hm
+	est := 2 * nbuckets * l.alpha * hm
+	if est < 2.5*nbuckets && nempties > 0 {
+		return uint64(-nbuckets * math.Log(nempties/nbuckets))
+	}
+
+	return uint64(est)
 }
 
 // ----------------------------------------------------
