@@ -1,6 +1,6 @@
 # HyperLogLog (and LogLog and SuperLogLog) for Go
 
-This family of algorithms implement fast approximate counting of arbitrary data (here implemented as binary keys), with a trivially small memory footprint. Their workings are similar enough that the only point of difference is the summarisation step, where the approximation is calculated from internal data. The same internal data can be used for both LogLog, SuperLogLog and HyperLogLog approximation.
+This algorithms in this family implement fast approximate counting of arbitrary data (here implemented as binary keys), with a trivially small memory footprint. Their workings are similar enough that the only point of difference is the summarisation step, where the approximation is calculated from internal data. The same internal data can be used for both LogLog, SuperLogLog and HyperLogLog approximation.
 
 The number of LogLog buckets (which affects accuracy, but soon saturates to diminishing returns) is adjustable, with 1024 being the recommended default, and 32 being the smallest practical size. This number must be an integral power of 2.
 
@@ -34,7 +34,7 @@ This example uses the plain old LogLog estimation algorithm, implemented in the 
 
 ## Performance
 
-Measured on an i5-5200U, the benchmark results are:
+Measured on an i5-5200U, the benchmark results (using 1024 buckets) are:
 
     BenchmarkLogLog-4                        2000000               712 ns/op
     BenchmarkSuperLogLog-4                   2000000               763 ns/op
@@ -45,7 +45,7 @@ Since HyperLogLog improves accuracy only slightly compared to LogLog and SuperLo
 
 ## Accuracy 
 
-A typical run of the test functions looks like this:
+A typical run of the test functions (using 1024 buckets) looks like this:
 
     LogLogRandom_1M 918170
     SuperLogLogRandom_1M 932190
