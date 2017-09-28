@@ -1,10 +1,9 @@
-package gohyperloglog
+package goestimators
 
 import (
 	"crypto/rand"
 	"fmt"
 	"testing"
-	"unsafe"
 )
 
 func TestLlogLogSimple(t *testing.T) {
@@ -191,18 +190,6 @@ func BenchmarkCountTrailing1Slow(b *testing.B) {
 		}
 		x := bytesToUint64(buf[:])
 		countTrailing1InUint64Alt(x)
-	}
-}
-
-func bytesToUint64(b []byte) uint64 {
-	return *((*uint64)(unsafe.Pointer(&b)))
-}
-
-func uint64ToBytes(x uint64, b []byte) {
-	p := uintptr(unsafe.Pointer(&x))
-	for i := 0; i < 8; i++ {
-		b[i] = byte(*(*byte)(unsafe.Pointer(p)))
-		p++
 	}
 }
 

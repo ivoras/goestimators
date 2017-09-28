@@ -1,4 +1,4 @@
-package gohyperloglog
+package goestimators
 
 import (
 	"fmt"
