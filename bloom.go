@@ -63,7 +63,10 @@ func (b *Bloom) buf2ints(buf []byte) []uint64 {
 
 	var mask uint64
 	var shift uint
-
+	
+	// A performance optimization: We either look at the first byte of the 64-bit hash and
+	// set the single bit in the 256-bit Bloom table, or we look at the first two bytes
+	// and set a single bit in the 65536-bit Bloom table.
 	if b.size == Size256 {
 		mask = 0xff
 		shift = 8
