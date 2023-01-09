@@ -6,9 +6,9 @@ import "log"
 type bloomSize int
 
 const (
-	// Size256 indicates a 256-bit Bloom filter
+	// Size256 indicates a 256-bit Bloom filter, with two hash functions (k=2)
 	Size256 bloomSize = iota
-	// Size65536 indicates a 65536-bit Bloom filter
+	// Size65536 indicates a 65536-bit Bloom filter, with four hash functions (k=4)
 	Size65536
 )
 
@@ -57,33 +57,34 @@ func (b *Bloom) Check(buf []byte) bool {
 	return true
 }
 
+// This is where the inner loop of the Bloom filter happens.
+// See https://en.wikipedia.org/wiki/Bloom_filter for a decent description.
 func (b *Bloom) buf2ints(buf []byte) []uint64 {
 	i := make([]uint64, b.nInts)
 	h := hash64(buf)
 
 	var mask uint64
-	var shift uint
-	
-	// A performance optimization: We either look at the first byte of the 64-bit hash and
-	// set the single bit in the 256-bit Bloom table, or we look at the first two bytes
-	// and set a single bit in the 65536-bit Bloom table.
+	var shift uint64
+
+	// A performance optimization: for a 256-bit Bloom filter, we use 2 bytes of the 64-bit
+	// hash function as 2 independant hash functions (k=2).
+	// For a 65536-bit Bloom filter, we split the 64-bit hash function into 4 16-bit hashes (k=4).
 	if b.size == Size256 {
 		mask = 0xff
 		shift = 8
-		h = h >> 56 // 64 bits are too much for a 256-bit Bloom base
+		h = h & 0xffff // Set the limit to two 8-bit hash functions (first 2 bytes of the 64-bit hash).
 	} else if b.size == Size65536 {
 		mask = 0xffff
 		shift = 16
-		h = h >> 32
 	} else {
 		log.Panic("Invalid size:", b.size)
 	}
 
 	for h > 0 {
-		b := h & mask
+		b := h & mask // Extract one of the k hash functions
 		//fmt.Println(buf, h, b, shift)
 		// set the b'th bit in i
-		i[b/64] |= 1 << (b % 64)
+		i[b/64] |= 1 << (b % 64) // Go is smart enough to do this with shifts.
 		h = h >> shift
 	}
 

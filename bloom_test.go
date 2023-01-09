@@ -1,7 +1,9 @@
 package goestimators
 
-import "testing"
-import "fmt"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestBloom256(t *testing.T) {
 	var N uint64 = 100
@@ -23,7 +25,7 @@ func TestBloom256(t *testing.T) {
 		}
 	}
 
-	fmt.Println("notfound", notfound)
+	fmt.Println("notfound.256:", notfound)
 	if notfound > 0 {
 		t.Log("Integers in range ", N, " not found:", notfound)
 	}
@@ -49,7 +51,7 @@ func TestBloom65536(t *testing.T) {
 		}
 	}
 
-	fmt.Println("notfound", notfound)
+	fmt.Println("notfound.65536:", notfound)
 	if notfound > 0 {
 		t.Log("Integers in range ", N, " not found:", notfound)
 	}
