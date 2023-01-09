@@ -1,4 +1,4 @@
-# Estimator algorithms for Go: (Hyper|Super)?LogLog, Bloom filter
+# Fast Estimator Algorithms for Go: (Hyper|Super)?LogLog, Bloom filter
 
 ## HyperLogLog (and LogLog and SuperLogLog) for Go
 
