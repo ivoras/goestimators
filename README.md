@@ -61,4 +61,4 @@ These are the estimates for 1M of sequential 8-byte buffers by the respective al
 
 This algorithm was implemented from scratch, mostly by reading the [Wikipedia article](https://en.wikipedia.org/wiki/Bloom_filter). It uses the Murmur3 function for the 64-bit hash implementation.
 
-For performance reasons, there are only two supported Bloom filter sizes: 256-bit, and 65536-bit. 
+For performance reasons, this is a 1-hash function Bloom filter (k=1) and there are only two supported Bloom filter sizes: 256-bit, and 65536-bit. 
