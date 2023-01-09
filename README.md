@@ -21,6 +21,7 @@ This library uses the [Murmur3](https://en.wikipedia.org/wiki/MurmurHash) hash f
 
 	ll, _ := NewLogLog(1024)
 	var buf := make([]byte, 8)
+	// Add 10000 random b-byte buffers to the set
 	for i := 0; i < 100000; i++ {
 		rand.Read(buf)
 		ll.Observe(buf)  // Observes the buffer, i.e. updates internal representation from it
@@ -62,3 +63,27 @@ These are the estimates for 1M of sequential 8-byte buffers by the respective al
 This algorithm was implemented from scratch, mostly by reading the [Wikipedia article](https://en.wikipedia.org/wiki/Bloom_filter). It uses the Murmur3 function for the 64-bit hash implementation.
 
 For performance reasons, there are only two supported Bloom filter sizes: 256-bit (which is 32 bytes), and 65536-bit (8 KiB). The 256-bit Bloom filter implements two hash functions (k=2), and the 65536-bit one implements four hash functions (k=4).
+
+### Example
+
+```
+const N = 100
+b := NewBloom(goestimators.Size256)
+
+// Add N random 64-bit numbers to the set
+var i uint64
+buf := make([]byte, 8)
+for i = 0; i < N; i++ {
+	uint64ToBytes(i, buf)
+	b.Observe(buf)
+}
+
+// Test for existance of N+10 elements
+notfound := 0
+for i = 0; i < N+10; i++ {
+	uint64ToBytes(i, buf)
+	if !b.Check(buf) {
+		notfound++
+	}
+}
+```
