@@ -43,7 +43,7 @@ func NewLogLog(nBuckets uint) (*LogLog, error) {
 	return &ll, nil
 }
 
-// Observe makes the LogLog calculation for the given byte array, "counting" it
+// Observe does the LogLog calculation for the given bytes, "counting" them
 // in its data structure.
 func (l *LogLog) Observe(b []byte) {
 	h := hash64(b)
