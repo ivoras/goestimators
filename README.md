@@ -54,7 +54,7 @@ A typical run of the test functions (using 1024 buckets) looks like this:
     SuperLogLogRandom_1M 932190
     HyperLogLogRandom_1M 1059335
 
-These are the estimates for 1M of sequential 8-byte buffers by the respective algorithms. YMMV.
+These are the estimates for observing 1M sequential 8-byte buffers (i.e. reasonably unique) by the respective algorithms. YMMV.
 
 # Bloom filter
 
