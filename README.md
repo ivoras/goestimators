@@ -21,7 +21,7 @@ This library uses the [Murmur3](https://en.wikipedia.org/wiki/MurmurHash) hash f
 
 	ll, _ := NewLogLog(1024)
 	var buf := make([]byte, 8)
-	// Add 100000 random b-byte buffers to the set
+	// Add 100000 random 8-byte buffers to the set
 	for i := 0; i < 100000; i++ {
 		rand.Read(buf)
 		ll.Observe(buf)  // Observes the buffer, i.e. updates internal representation from it
