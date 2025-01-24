@@ -2,7 +2,7 @@
 
 ## HyperLogLog (and LogLog and SuperLogLog) for Go
 
-This algorithms in this family implement fast approximate counting of arbitrary data (here implemented as binary keys), with a trivially small memory footprint. Their workings are similar enough that the only point of difference is the summarisation step, where the approximation is calculated from internal data. The same internal data can be used for both LogLog, SuperLogLog and HyperLogLog approximation.
+The algorithms in this family implement fast approximate counting of arbitrary data (here implemented as binary keys), with a trivially small memory footprint. The algorithms are similar enough that the only point of difference is the summarisation step, where the approximation is calculated from internal data. The same internal data can be used for both LogLog, SuperLogLog and HyperLogLog approximation.
 
 The number of LogLog buckets (which affects accuracy, but soon saturates to diminishing returns) is adjustable, with 1024 being the recommended default, and 32 being the smallest practical size. This number must be an integral power of 2.
 
@@ -15,7 +15,7 @@ This library was implemented from scratch, by interpreting the following papers 
 
 Any implementation errors are probably my own.
 
-This library uses the [Murmur3](https://en.wikipedia.org/wiki/MurmurHash) hash function implementation from [github.com/spaolacci/murmur3](https://github.com/spaolacci/murmur3).
+This library uses the [Murmur3](https://en.wikipedia.org/wiki/MurmurHash) hash function implementation from [github.com/spaolacci/murmur3](https://github.com/spaolacci/murmur3), for optimal hashing performance.
 
 ### Example
 
