@@ -1,5 +1,11 @@
 # Fast Estimator Algorithms for Go: (Hyper|Super)?LogLog, Bloom filter
 
+These algorithms are usable for:
+
+* Tracking web page hits in high-performance environments (millions or billions) of pages and users
+* Tracking product popularity
+* Tracking approximate statistics
+
 ## HyperLogLog (and LogLog and SuperLogLog) for Go
 
 The algorithms in this family implement fast approximate counting of arbitrary data (here implemented as binary keys), with a trivially small memory footprint. The algorithms are similar enough that the only point of difference is the summarisation step, where the approximation is calculated from internal data. The same internal data can be used for both LogLog, SuperLogLog and HyperLogLog approximation.
